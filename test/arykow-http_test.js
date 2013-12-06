@@ -1,36 +1,32 @@
 'use strict';
 
-var arykow_http = require('../lib/arykow-http.js');
+var arykow = {
+  http: require('../lib/arykow-http.js'),
+  test: require('../test/arykow-test.js').Test
+};
 
-/*
-  ======== A Handy Little Nodeunit Reference ========
-  https://github.com/caolan/nodeunit
+var UTIL = require('util');
 
-  Test methods:
-    test.expect(numAssertions)
-    test.done()
-  Test assertions:
-    test.ok(value, [message])
-    test.equal(actual, expected, [message])
-    test.notEqual(actual, expected, [message])
-    test.deepEqual(actual, expected, [message])
-    test.notDeepEqual(actual, expected, [message])
-    test.strictEqual(actual, expected, [message])
-    test.notStrictEqual(actual, expected, [message])
-    test.throws(block, [error], [message])
-    test.doesNotThrow(block, [error], [message])
-    test.ifError(value)
-*/
+arykow.test.prototype.testGetURLSuccess = function(uri) {
+  return this.testPromise(true, arykow.http.get().uri(uri).execute(), "testGetURLSuccess: " + UTIL.inspect(arguments));
+};
 
-exports['awesome'] = {
+arykow.test.prototype.testGetURLFailure = function(uri) {
+  return this.testPromise(false, arykow.http.get().uri(uri).execute(), "testGetURLFailure: " + UTIL.inspect(arguments));
+};
+
+exports['get'] = {
   setUp: function(done) {
     // setup here
     done();
   },
-  'no args': function(test) {
-    test.expect(1);
-    // tests here
-    test.equal(arykow_http.awesome(), 'awesome', 'should be awesome.');
-    test.done();
-  },
+  'success tests': new arykow.test()
+    .testGetURLSuccess('http://www.google.fr')
+    .testGetURLSuccess('http://www.google.com')
+    .testGetURLSuccess('http://www.google.com/not.exists')
+    .run(),
+  'failure tests': new arykow.test()
+    .testGetURLFailure('http://127.0.0.1:3093/not.exists')
+    .testGetURLFailure('ht:tp://www.google.fr')
+    .run()
 };
